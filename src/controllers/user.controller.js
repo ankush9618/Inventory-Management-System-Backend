@@ -75,6 +75,18 @@ const loginUser = asyncHandler(async (req, res) => { //Logging a User
         )
 })
 
+const logoutUser = asyncHandler(async (req, res) => { // logout User
+
+    return res
+        .status(200)
+        .clearCookie("accessToken", COOKIE_OPTIONS)
+        .clearCookie("refreshToken", COOKIE_OPTIONS)
+        .json(
+            new ApiResponse(200, "User Logout Successfull", {})
+        )
+
+})
+
 const updateAvatar = asyncHandler(async (req, res) => { //Updating User Details
     const avatar = req.file?.avatar;
 })
@@ -82,6 +94,6 @@ const updateAvatar = asyncHandler(async (req, res) => { //Updating User Details
 export {
     registerUser,
     loginUser,
-    updateAvatar
-
+    updateAvatar,
+    logoutUser
 };
