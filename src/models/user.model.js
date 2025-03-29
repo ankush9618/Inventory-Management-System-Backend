@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["admin", "employee"],
         default: "employee"
+    },
+    avatar: {
+        type: String,
+        default: "https://res.cloudinary.com/daootd1uo/image/upload/v1742757690/qi1onwszqlq6cxtcpm5b.png"
     }
 }, { timestamps: true })
 
@@ -63,5 +67,12 @@ userSchema.methods.generateRefreshToken = async function () {
         }
     )
 }
+
+userSchema.methods.toJSON = function () {
+    const user = this.toObject();
+    delete user.password;
+    delete user.refreshToken;
+    return user;
+};
 
 export const User = mongoose.model("User", userSchema);
