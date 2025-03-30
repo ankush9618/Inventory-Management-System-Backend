@@ -1,5 +1,5 @@
 import express from "express";
-import { loginUser, logoutUser, registerUser, updateAvatar } from "../controllers/user.controller.js";
+import { changeCurrentPassword, loginUser, logoutUser, registerUser, updateAvatar } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.middleware.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -14,5 +14,6 @@ router.route("/update-avatar").patch(
     upload.single('avatar'),
     updateAvatar
 )
+router.route("/change-password").patch(verifyJWT, changeCurrentPassword);
 
 export default router;

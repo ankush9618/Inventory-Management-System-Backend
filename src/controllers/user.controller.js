@@ -127,9 +127,40 @@ const updateAvatar = asyncHandler(async (req, res) => { //Updating Avatar Image
 
 })
 
+const changeCurrentPassword = asyncHandler(async (req, res) => {//Change current password
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    if ([currentPassword, newPassword, confirmPassword].some(item => item === "")) {
+        throw new ApiError(401, "All the fields are required to proceed");
+    }
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new ApiError(404, "Unable to fetch User Data");
+    }
+    const verifyPassword = await user.isPasswordCorrect(currentPassword);
+    if (!verifyPassword) {
+        throw new ApiError(401, "Your Current Password is Incorrect");
+    }
+    if (newPassword != confirmPassword) {
+        throw new ApiError(401, "New Password and Confirm Password dosen't match");
+    }
+    if (currentPassword == newPassword) {
+        throw new ApiError(401, "New Password must be different from current Password");
+    }
+    user.password = newPassword;
+    await user.save();
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, "Password Changed Successfully", user.toJSON())
+        )
+
+})
+
 export {
     registerUser,
     loginUser,
     updateAvatar,
-    logoutUser
+    logoutUser,
+    changeCurrentPassword
 };
