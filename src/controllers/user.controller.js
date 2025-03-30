@@ -3,6 +3,7 @@ import ApiError from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { COOKIE_OPTIONS } from "../constants.js";
+import { deleteFromCloudinary, uploadToCloudinary } from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshToken = async (userId) => { //generate Access and Refresh Token and update refresh token in DB
     try {
@@ -87,8 +88,43 @@ const logoutUser = asyncHandler(async (req, res) => { // logout User
 
 })
 
-const updateAvatar = asyncHandler(async (req, res) => { //Updating User Details
-    const avatar = req.file?.avatar;
+const updateAvatar = asyncHandler(async (req, res) => { //Updating Avatar Image
+    const avatarLocalFilePath = req.file?.path;
+    //console.log(req.file.path)
+
+    if (!avatarLocalFilePath) {
+        throw new ApiError(400, "Avatar Image is required to proceed");
+    }
+    const cloudinaryUpload = await uploadToCloudinary(avatarLocalFilePath);
+    if (!cloudinaryUpload) {
+        throw new ApiError(501, "Error Uploading Image to Cloud");
+    }
+    // const avatarUrl = req.user.avatar;
+    // const cloudinaryDelete = await deleteFromCloudinary(avatarUrl);
+    // if (!cloudinaryDelete) {
+    //     throw new ApiError(501, "Error Deleting Image from Cloud")
+    // }
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                avatar: cloudinaryUpload.url
+            }
+        },
+        {
+            new: true
+        }
+    ).select("-password -refreshToken");
+    if (!user) {
+        throw new ApiError(501, "Error Updating Avatar to Database");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, "Avatar Updated Successfully", user)
+        )
+
 })
 
 export {
