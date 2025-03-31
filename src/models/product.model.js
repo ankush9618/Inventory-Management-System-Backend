@@ -18,8 +18,7 @@ const productSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        required: true,
-        default: "Medicine",
+        default: "General",
         trim: true
     }
 }, { timestamps: true })

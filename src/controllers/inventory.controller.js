@@ -5,17 +5,18 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 
 const addStock = asyncHandler(async (req, res) => {//Adding Stcock Quantity
-    const { productId, stock } = req.body;
+    const { productId } = req.params;
+    const { stock } = req.body;
     if (!productId || stock === undefined) {
         throw new ApiError(400, "All the fields are required to proceed");
     }
     const inventory = await Inventory.findOne({ product: productId });
     if (!inventory) {
-        throw new ApiError(404, "The Product does not Exists")
+        throw new ApiError(404, "The Product does not Exist")
     }
     const quantity = inventory.stock + Number(stock);
     if (quantity < 1) {
-        throw new ApiError(400, "Stock cannot be less then 1")
+        throw new ApiError(400, "Stock cannot be less than 1")
     }
     inventory.stock = quantity;
     await inventory.save();
@@ -28,17 +29,18 @@ const addStock = asyncHandler(async (req, res) => {//Adding Stcock Quantity
 })
 
 const removeStock = asyncHandler(async (req, res) => { //Updating Stock Quantity
-    const { productId, stock } = req.body;
+    const { productId } = req.params;
+    const { stock } = req.body;
     if (!productId || stock === undefined) {
         throw new ApiError(400, "All the fields are required to proceed");
     }
     const inventory = await Inventory.findOne({ product: productId });
     if (!inventory) {
-        throw new ApiError(404, "The Product does not Exists")
+        throw new ApiError(404, "The Product does not Exist")
     }
     const quantity = inventory.stock - Number(stock);
     if (quantity < 0) {
-        throw new ApiError(400, "Stock cannot be less then 0")
+        throw new ApiError(400, "Stock cannot be less than 0")
     }
     inventory.stock = quantity;
     await inventory.save();
@@ -51,13 +53,13 @@ const removeStock = asyncHandler(async (req, res) => { //Updating Stock Quantity
 })
 
 const clearStock = asyncHandler(async (req, res) => { //Clearing Stock Quantity
-    const { productId } = req.body;
+    const { productId } = req.params;
     if (!productId) {
         throw new ApiError(400, "Select the Product to Proceed");
     }
     const inventory = await Inventory.findOne({ product: productId });
     if (!inventory) {
-        throw new ApiError(404, "Product Doesn't Exists");
+        throw new ApiError(404, "Product Doesn't Exist");
     }
     inventory.stock = 0;
     await inventory.save();
@@ -79,7 +81,7 @@ const getStock = asyncHandler(async (req, res) => { //get Stock details
         : await Inventory.find();
 
     if (!inventory) {
-        throw new ApiError(404, "Product Doesn't Exists");
+        throw new ApiError(404, "Product Doesn't Exist");
     }
 
     return res
