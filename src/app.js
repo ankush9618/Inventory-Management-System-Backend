@@ -3,6 +3,8 @@ import cors from "cors";
 import userRouter from "./routes/user.route.js";
 import cooKieParser from "cookie-parser";
 import productRouter from "./routes/product.route.js"
+import inventoryRouter from "./routes/inventory.routes.js"
+
 const app = express();
 
 // Middleware
@@ -18,8 +20,11 @@ app.use("/api/users", userRouter);
 //Product Route
 app.use("/api/products", productRouter);
 
+//Inventory Router
+app.use("/api/inventory", inventoryRouter);
+
 // Health Check Route
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
     res.status(200).json({ message: "API is running!" });
 });
 
