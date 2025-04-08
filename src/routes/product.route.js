@@ -4,7 +4,7 @@ import { addProduct, deleteProduct, getAllProducts, getProduct, updateProduct } 
 
 const router = express.Router();
 
-router.route("/").get(verifyJWT, getAllProducts);
+router.route("/").get(verifyJWT,getAllProducts);
 router.route("/:productId").get(verifyJWT, getProduct);
 router.route("/add").post(verifyJWT, isAdmin, addProduct);
 router.route("/delete/:productId").delete(verifyJWT, isAdmin, deleteProduct);

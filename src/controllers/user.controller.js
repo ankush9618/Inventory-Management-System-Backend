@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { COOKIE_OPTIONS } from "../constants.js";
 import { deleteFromCloudinary, uploadToCloudinary } from "../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (userId) => { //generate Access and Refresh Token and update refresh token in DB
     try {
@@ -67,6 +68,7 @@ const loginUser = asyncHandler(async (req, res) => { //Logging a User
     }
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
     const verifiedUser = user.toJSON();
+    console.log(verifiedUser)
     return res
         .status(200)
         .cookie("accessToken", accessToken, COOKIE_OPTIONS)
@@ -86,6 +88,18 @@ const logoutUser = asyncHandler(async (req, res) => { // logout User
             new ApiResponse(200, "User Logout Successfull", {})
         )
 
+})
+
+const getUserDetails = asyncHandler(async(req,res)=>{
+    const user = await User.findById(req.user._id);
+    if(!user){
+        throw new ApiError(400,"User Not Found");
+    }
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,"Details Fetched Successfully",user)
+    )
 })
 
 const updateAvatar = asyncHandler(async (req, res) => { //Updating Avatar Image
@@ -157,10 +171,24 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {//Change current
 
 })
 
+const isUserLoggedIn = asyncHandler(async(req,res)=>{
+    const token = req.cookies?.accessToken;
+    if(!token){
+        return res.json(false)
+    }
+    const verifyUser = jwt.verify(token,process.env.ACCESS_TOKEN_KEY);
+    if(!verifyUser){
+        return res.json(false);
+    }
+    return res.json(true);
+})
+
 export {
     registerUser,
     loginUser,
     updateAvatar,
     logoutUser,
-    changeCurrentPassword
+    changeCurrentPassword,
+    getUserDetails,
+    isUserLoggedIn
 };
