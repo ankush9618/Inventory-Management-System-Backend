@@ -82,16 +82,39 @@ const updateProduct = asyncHandler(async (req, res) => {//Updating Product Detai
 })
 
 const getAllProducts = asyncHandler(async (req, res) => {
-    const product = await Product.find();
-    if (!product) {
-        throw new ApiError(400, "Something went wrong While Getting Products");
+    const products = await Product.aggregate([
+        {
+            $lookup: {
+                from: "inventories",           // MongoDB collection name
+                localField: "_id",             // _id of Product
+                foreignField: "product",       // 'product' field in Inventory
+                as: "stockInfo"
+            }
+        },
+        {
+            $addFields: {
+                stock: {
+                    $ifNull: [{ $arrayElemAt: ["$stockInfo.stock", 0] }, 0]
+                }
+            }
+        },
+        {
+            $project: {
+                stockInfo: 0 // hide raw stockInfo array
+            }
+        }
+    ]);
+
+    if (!products) {
+        throw new ApiError(400, "Something went wrong while getting products");
     }
-    return res
-        .status(200)
-        .json(
-            new ApiResponse(200, "Products Fetched Successfully", product)
-        )
-})
+
+    return res.status(200).json(
+        new ApiResponse(200, "Products fetched successfully", products)
+    );
+});
+
+
 
 const getProduct = asyncHandler(async (req, res) => {
     const { productId } = req.params;
