@@ -13,6 +13,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cooKieParser())
+app.options('*', cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  }));
+  
 
 // UserRoutes
 app.use("/api/users", userRouter);
