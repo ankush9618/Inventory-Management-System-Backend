@@ -13,11 +13,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cooKieParser())
-app.options('*', cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-  }));
-  
+
+
+  console.log(process.env.CORS_ORIGIN)
 
 // UserRoutes
 app.use("/api/users", userRouter);
@@ -27,6 +25,11 @@ app.use("/api/products", productRouter);
 
 //Inventory Router
 app.use("/api/inventory", inventoryRouter);
+
+//Home Route
+app.get("/",(req,res)=>{
+  res.send("Server is running")
+})
 
 // Health Check Route
 app.get("/api", (req, res) => {
