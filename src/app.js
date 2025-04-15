@@ -1,21 +1,35 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.route.js";
-import cooKieParser from "cookie-parser";
-import productRouter from "./routes/product.route.js"
-import inventoryRouter from "./routes/inventory.routes.js"
+import productRouter from "./routes/product.route.js";
+import inventoryRouter from "./routes/inventory.routes.js";
+import ApiError from "./utils/ApiError.js";
 
 const app = express();
 
-// Middleware
+// --- Middlewares ---
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
-app.use(cooKieParser())
+app.use(cookieParser());
 
-import ApiError from "./utils/ApiError.js";
+// --- Routes ---
+app.use("/api/users", userRouter);
+app.use("/api/products", productRouter);
+app.use("/api/inventory", inventoryRouter);
 
+// Home + Health check
+app.get("/", (req, res) => {
+  res.send("Server is running");
+});
+
+app.get("/api", (req, res) => {
+  res.status(200).json({ message: "API is running!" });
+});
+
+// --- Error handler (🚨 must be last) ---
 app.use((err, req, res, next) => {
   if (err instanceof ApiError) {
     return res.status(err.statusCode).json({
@@ -25,36 +39,14 @@ app.use((err, req, res, next) => {
       data: null,
     });
   }
-  // fallback for unexpected errors
-  console.error(err);
+
+  console.error("Unhandled Error:", err);
   return res.status(500).json({
     success: false,
     message: "Internal Server Error",
     errors: [],
     data: null,
   });
-});
-
-
-  //console.log(process.env.CORS_ORIGIN)
-
-// UserRoutes
-app.use("/api/users", userRouter);
-
-//Product Route
-app.use("/api/products", productRouter);
-
-//Inventory Router
-app.use("/api/inventory", inventoryRouter);
-
-//Home Route
-app.get("/",(req,res)=>{
-  res.send("Server is running")
-})
-
-// Health Check Route
-app.get("/api", (req, res) => {
-    res.status(200).json({ message: "API is running!" });
 });
 
 export { app };
