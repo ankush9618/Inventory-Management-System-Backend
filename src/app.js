@@ -14,8 +14,29 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cooKieParser())
 
+import ApiError from "./utils/ApiError.js";
 
-  console.log(process.env.CORS_ORIGIN)
+app.use((err, req, res, next) => {
+  if (err instanceof ApiError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+      errors: err.errors,
+      data: null,
+    });
+  }
+  // fallback for unexpected errors
+  console.error(err);
+  return res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+    errors: [],
+    data: null,
+  });
+});
+
+
+  //console.log(process.env.CORS_ORIGIN)
 
 // UserRoutes
 app.use("/api/users", userRouter);
